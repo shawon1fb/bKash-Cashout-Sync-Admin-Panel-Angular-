@@ -13,6 +13,14 @@ export interface AgentQuery {
   sortOrder?: 'asc' | 'desc';
 }
 
+export interface TopAgent {
+  agentId: string;
+  name: string;
+  phone: string;
+  totalPaid: number;
+  txCount: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AgentService {
   private api = inject(ApiService);
@@ -47,6 +55,10 @@ export class AgentService {
     return this.api.delete<UserResponse>(`/admin/agents/${uuid}`).pipe(
       tap(() => this.reload())
     );
+  }
+
+  topAgents(limit = 5): Observable<ApiResponse<TopAgent[]>> {
+    return this.api.get<TopAgent[]>('/admin/agents/top', { limit });
   }
 
   userProfile(): Observable<ApiResponse<UserResponse>> {

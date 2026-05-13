@@ -5,7 +5,7 @@ import { map } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { DrawerService } from '../../core/services/drawer.service';
 import { TransactionService } from '../../core/services/transaction.service';
-import { AgentService } from '../../core/services/agent.service';
+import { AgentService, TopAgent } from '../../core/services/agent.service';
 import { StatCard } from '../../shared/components/stat-card/stat-card';
 import { StatusBadge } from '../../shared/components/status-badge/status-badge';
 import { LineAreaChart } from '../../shared/components/charts/line-area-chart';
@@ -148,13 +148,13 @@ import { UserResponse } from '../../core/models/user.model';
                 </button>
               </div>
               <div style="padding:14px">
-                @for (a of topAgents(); track a.agent.id; let i = $index) {
-                  <div style="padding:10px 8px;cursor:pointer" [style.border-bottom]="i < topAgents().length-1 ? '1px solid var(--divider)' : 'none'" (click)="router.navigate(['/agents',a.agent.id])">
+                @for (a of topAgents(); track a.agentId; let i = $index) {
+                  <div style="padding:10px 8px;cursor:pointer" [style.border-bottom]="i < topAgents().length-1 ? '1px solid var(--divider)' : 'none'" (click)="router.navigate(['/agents',a.agentId])">
                     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-                      <div class="avatar" [style.background]="'hsl('+((i*67)%360)+',60%,55%)'">{{ initials(a.agent.name) }}</div>
+                      <div class="avatar" [style.background]="'hsl('+((i*67)%360)+',60%,55%)'">{{ initials(a.name) }}</div>
                       <div style="flex:1;min-width:0">
-                        <div style="font-size:13px;font-weight:500">{{ a.agent.name }}</div>
-                        <div style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono)">{{ a.agent.phone | phone }}</div>
+                        <div style="font-size:13px;font-weight:500">{{ a.name }}</div>
+                        <div style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono)">{{ a.phone | phone }}</div>
                       </div>
                       <div style="text-align:right">
                         <div class="mono" style="font-size:13px;font-weight:500">{{ fmtShort(a.totalPaid) }}</div>
@@ -271,16 +271,10 @@ export class DashboardPage {
   readonly heatmapData = computed(() => dailySeries(this.allTx(), 49));
   readonly recentTx    = computed(() => this.allTx().slice(0, 8));
 
-  readonly topAgents = computed(() => {
-    const txs = this.allTx();
-    return this.allAgents()
-      .map(a => {
-        const mine = txs.filter(t => t.agentId === a.id && t.status === 'paid');
-        return { agent: a, totalPaid: mine.reduce((s, t) => s + parseFloat(t.amount), 0), txCount: mine.length };
-      })
-      .sort((a, b) => b.totalPaid - a.totalPaid)
-      .slice(0, 5);
+  readonly topAgentsRes = rxResource({
+    stream: () => this.agentSvc.topAgents(5).pipe(map(r => r.data ?? [])),
   });
+  readonly topAgents = computed(() => this.topAgentsRes.value() ?? [] as TopAgent[]);
 
   readonly donutSegments = computed(() => [
     { label: 'Paid',     value: this.paidTx().length,     color: 'var(--success)' },
