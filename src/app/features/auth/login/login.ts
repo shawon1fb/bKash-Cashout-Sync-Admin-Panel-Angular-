@@ -57,13 +57,6 @@ import { PhonePipe } from '../../../shared/pipes/phone.pipe';
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
               }
             </button>
-            <div style="margin-top:22px;padding:12px;background:var(--surface-2);border:1px dashed var(--border-strong);border-radius:var(--r-sm);font-size:12px;color:var(--text-muted)">
-              <div style="display:flex;align-items:center;gap:6px;color:var(--text-2);font-weight:500;margin-bottom:4px">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                Demo mode
-              </div>
-              Any valid BD number works. Use OTP <span style="color:var(--brand-2);font-family:var(--font-mono)">123456</span> or the one shown next screen.
-            </div>
           </div>
         } @else {
           <div>
@@ -92,8 +85,6 @@ import { PhonePipe } from '../../../shared/pipes/phone.pipe';
               </span>
               @if (secondsLeft() <= 0) {
                 <button (click)="sendOtp()" style="color:var(--brand-2);font-weight:500">Resend</button>
-              } @else {
-                <span style="color:var(--text-dim)">Demo OTP: <span style="font-family:var(--font-mono);color:var(--brand-2)">{{ demoOtp() }}</span></span>
               }
             </div>
             <button (click)="verify()" [disabled]="!otpFull() || loading()" class="btn btn-primary"
@@ -122,13 +113,12 @@ export class LoginPage {
   private toast  = inject(ToastService);
 
   readonly step       = signal<'phone' | 'otp'>('phone');
-  readonly phone      = signal('01711223344');
+  readonly phone      = signal('');
   readonly otp        = signal(['', '', '', '', '', '']);
   readonly phoneError = signal('');
   readonly otpError   = signal('');
   readonly loading    = signal(false);
   readonly secondsLeft = signal(300);
-  readonly demoOtp    = signal('');
 
   private timerRef: ReturnType<typeof setInterval> | null = null;
 
@@ -163,16 +153,16 @@ export class LoginPage {
     if (!this.phoneOk()) { this.phoneError.set('Enter a valid Bangladeshi number'); return; }
     this.loading.set(true);
 
-    // Demo: generate local OTP, skip real API if no backend
     this.auth.sendOtp(this.phone()).subscribe({
       next: () => this.afterOtpSent(),
-      error: () => this.afterOtpSent(), // still allow demo
+      error: (err) => {
+        this.phoneError.set(err?.error?.message ?? 'Failed to send OTP. Try again.');
+        this.loading.set(false);
+      },
     });
   }
 
   private afterOtpSent(): void {
-    const code = String(Math.floor(100000 + Math.random() * 900000));
-    this.demoOtp.set(code);
     this.secondsLeft.set(300);
     this.step.set('otp');
     this.loading.set(false);
@@ -201,30 +191,14 @@ export class LoginPage {
     this.loading.set(true);
 
     this.auth.verifyOtp(this.phone(), code).subscribe({
-      next: (res) => {
+      next: () => {
         this.loading.set(false);
         this.toast.success('Welcome back!');
         this.router.navigate(['/dashboard']);
       },
-      error: () => {
-        // Demo fallback: accept demoOtp or 123456
-        if (code === this.demoOtp() || code === '123456') {
-          this.loading.set(false);
-          // Store a mock user for demo
-          this.auth['currentUser'].set({
-            id: 'adm-001', name: 'Ayesha Karim', phone: this.phone(),
-            role: 'admin', isActive: true,
-            createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
-          });
-          this.auth['storage'].set('bk_user', this.auth.currentUser());
-          this.auth['storage'].set('bk_access_token', 'demo-token');
-          this.auth['storage'].set('bk_refresh_token', 'demo-refresh');
-          this.toast.success('Welcome back, Ayesha!');
-          this.router.navigate(['/dashboard']);
-        } else {
-          this.otpError.set(`Invalid OTP — try ${this.demoOtp()} or 123456`);
-          this.loading.set(false);
-        }
+      error: (err) => {
+        this.otpError.set(err?.error?.message ?? 'Invalid OTP. Please try again.');
+        this.loading.set(false);
       },
     });
   }

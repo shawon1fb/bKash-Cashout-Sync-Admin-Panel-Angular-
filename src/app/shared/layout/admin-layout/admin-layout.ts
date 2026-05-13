@@ -5,7 +5,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../core/services/auth.service';
 import { ThemeService } from '../../../core/services/theme.service';
 import { DrawerService } from '../../../core/services/drawer.service';
-import { ToastService } from '../../../core/services/toast.service';
 import { Sidebar } from '../../components/sidebar/sidebar';
 import { Topbar } from '../../components/topbar/topbar';
 import { TransactionDrawer } from '../../components/transaction-drawer/transaction-drawer';
@@ -42,9 +41,7 @@ const TITLES: Record<string, [string, string]> = {
           [title]="title()"
           [subtitle]="subtitle()"
           [theme]="themeService.theme()"
-          [role]="role()"
           (toggleTheme)="themeService.toggle()"
-          (switchRole)="switchRole($event)"
         />
         <router-outlet />
       </div>
@@ -62,7 +59,6 @@ export class AdminLayout implements OnInit {
   protected authService   = inject(AuthService);
   protected themeService  = inject(ThemeService);
   protected drawerService = inject(DrawerService);
-  private toast           = inject(ToastService);
   private router          = inject(Router);
 
   readonly collapsed  = signal(false);
@@ -106,13 +102,4 @@ export class AdminLayout implements OnInit {
     this.router.navigate(['/' + path]);
   }
 
-  switchRole(role: string): void {
-    // Demo-only: update current user role in auth service
-    const user = this.authService.currentUser();
-    if (user) {
-      this.authService['currentUser'].set({ ...user, role: role as any });
-    }
-    this.toast.info(`Switched to ${role} view`);
-    this.router.navigate(['/dashboard']);
-  }
 }

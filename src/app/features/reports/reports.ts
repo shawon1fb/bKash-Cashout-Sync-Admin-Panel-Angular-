@@ -169,8 +169,8 @@ export class ReportsPage {
   private readonly summaryQuery = computed((): { period: string; agentId?: string; from?: string; to?: string } => ({
     period: this.period(),
     agentId: this.isAdmin() && this.agentFilter() !== 'all' ? this.agentFilter() : undefined,
-    from: this.period() === 'custom' ? this.customFrom() : undefined,
-    to:   this.period() === 'custom' ? this.customTo()   : undefined,
+    from: this.period() === 'custom' && this.customFrom() ? new Date(this.customFrom()).toISOString() : undefined,
+    to:   this.period() === 'custom' && this.customTo()   ? new Date(this.customTo()).toISOString()   : undefined,
   }));
 
   private readonly txQuery = computed((): { agentId?: string; from?: string; to?: string; limit: number } => ({
@@ -225,11 +225,15 @@ export class ReportsPage {
   });
 
   private dateParams(): { from?: string; to?: string } {
-    if (this.period() === 'custom') return { from: this.customFrom(), to: this.customTo() };
+    if (this.period() === 'custom') {
+      const from = this.customFrom() ? new Date(this.customFrom()).toISOString() : undefined;
+      const to   = this.customTo()   ? new Date(this.customTo()).toISOString()   : undefined;
+      return { from, to };
+    }
     const daysMap: Record<string, number> = { daily: 14, weekly: 90, monthly: 180 };
     const days = daysMap[this.period()] ?? 90;
     const from = new Date(); from.setDate(from.getDate() - days);
-    return { from: from.toISOString().split('T')[0] };
+    return { from: from.toISOString() };
   }
 
   initials(name: string): string { return name.split(' ').map((s: string) => s[0]).slice(0, 2).join(''); }

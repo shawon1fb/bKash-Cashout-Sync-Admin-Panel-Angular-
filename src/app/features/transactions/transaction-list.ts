@@ -234,7 +234,7 @@ export class TransactionListPage {
     if (!d) return {};
     const from = new Date();
     from.setDate(from.getDate() - d);
-    return { from: from.toISOString().split('T')[0] };
+    return { from: from.toISOString() };
   }
 
   onSearch(v: string): void {
