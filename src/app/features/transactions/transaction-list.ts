@@ -88,8 +88,8 @@ import { UserResponse } from '../../core/models/user.model';
                 <th>TrxID</th>
                 @if (isAdmin()) { <th>Agent</th> }
                 <th>Sender</th>
+                <th>Receiver</th>
                 <th class="tbl-num">Amount</th>
-                <th class="tbl-num">Fee</th>
                 <th>Status</th>
                 <th>Time</th>
                 <th style="width:100px"></th>
@@ -135,8 +135,8 @@ import { UserResponse } from '../../core/models/user.model';
                     </td>
                   }
                   <td class="mono" style="font-size:12px;color:var(--text-2)">{{ t.senderPhone | phone }}</td>
+                  <td class="mono" style="font-size:12px;color:var(--text-2)">{{ t.receiverPhone | phone }}</td>
                   <td class="tbl-num mono" style="font-weight:500">{{ t.amount | amount }}</td>
-                  <td class="tbl-num mono" style="color:var(--text-muted);font-size:12px">{{ t.fee | amount:false }}</td>
                   <td><app-status-badge [status]="t.status"/></td>
                   <td>
                     <div style="font-size:12px">{{ fmtRelative(t.transactionTime) }}</div>
