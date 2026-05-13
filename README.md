@@ -98,6 +98,16 @@ cd bkash-admin   # অথবা প্রজেক্ট ফোল্ডার
 npm install
 ```
 
+### NPM Scripts
+
+| Command | কাজ |
+|---------|-----|
+| `npm start` | ডেভেলপমেন্ট সার্ভার চালু করে |
+| `npm run build` | ডিফল্ট production build তৈরি করে |
+| `npm run watch` | development mode এ watch build চালায় |
+| `npm test` | unit tests চালায় |
+| `npm run lint` | lint checks চালায় |
+
 ---
 
 ## Development Server চালু করা
@@ -151,6 +161,15 @@ export const environment = {
 ```
 
 **API Base URL চেঞ্জ করতে** `src/environments/environment.ts` ফাইলটি এডিট করো।
+
+### Recommended `.env`-style Mapping (Team Convention)
+
+যদি CI/CD বা deployment pipeline-এ environment variable থেকে value inject করো, তাহলে নিচের keys follow করতে পারো:
+
+- `API_URL` → `environment.apiUrl`
+- `APP_ENV` → `production` flag নির্ধারণে
+
+Note: Angular runtime-এ `.env` সরাসরি পড়ে না; build-time replace বা pipeline template ব্যবহার করতে হবে।
 
 ---
 
@@ -239,6 +258,20 @@ ng lint
 - `GET /admin/agents/:uuid/summary`
 - `GET /admin/agents/:uuid/transactions`
 
+### Error Response Convention (Suggested)
+
+Backend error shape ideally নিচের মতো consistent হলে frontend handling সহজ হয়:
+
+```json
+{
+  "success": false,
+  "message": "Validation failed",
+  "errors": {
+    "phone": ["Phone number is invalid"]
+  }
+}
+```
+
 ---
 
 ## Dark Mode
@@ -264,6 +297,26 @@ Dark/Light mode CSS variables (`styles.scss`) এবং `html` ট্যাগ�
 4. **Defer heavy UI** — Chart / Table এর জন্য `@defer` ব্লক ব্যবহার করো
 5. **Never hardcode colors** — সবসময় CSS Variables ব্যবহার করো (`var(--brand)`, `var(--surface)`)
 6. **Forms** — ReactiveFormsModule ব্যবহার করো (template-driven নয়)
+
+---
+
+## Troubleshooting
+
+- **`npm install` error (engine mismatch)**: Node.js `v22+` এবং npm `11+` আছে কিনা চেক করো
+- **`ng` command not found**: `npm start` ব্যবহার করো, বা `npx ng serve` চালাও
+- **CORS / API call fail**: `environment.ts` এর `apiUrl` backend URL এর সাথে মিলাও
+- **Auth loop (login page এ ফিরে যায়)**: localStorage clear করে আবার login করো
+- **Charts render না হলে**: browser console দেখে ApexCharts related error verify করো
+
+---
+
+## Deployment Notes
+
+1. `ng build --configuration=production` রান করো
+2. `dist/bkash-admin` থেকে static assets serve করো (Nginx/Cloudflare Pages/S3+CDN)
+3. সব route support করার জন্য SPA fallback configure করো (`/index.html`)
+4. API base URL production environment অনুযায়ী set করো
+5. deploy এর পরে login, dashboard, upload, reports flow smoke test করো
 
 ---
 
