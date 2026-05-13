@@ -27,7 +27,7 @@ import { UserResponse } from '../../core/models/user.model';
           <h1 class="page-title">{{ isAdmin() ? 'Reports' : 'My reports' }}</h1>
           <div class="page-sub">Performance breakdown — pick a period to slice</div>
         </div>
-        <button class="btn">
+        <button class="btn" (click)="exportPdf()">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Export PDF
         </button>
@@ -237,4 +237,6 @@ export class ReportsPage {
   }
 
   initials(name: string): string { return name.split(' ').map((s: string) => s[0]).slice(0, 2).join(''); }
+
+  exportPdf(): void { window.print(); }
 }
