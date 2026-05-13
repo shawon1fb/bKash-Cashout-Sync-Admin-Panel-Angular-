@@ -145,7 +145,7 @@ import { UserResponse } from '../../core/models/user.model';
                   </td>
                   <td style="text-align:right">
                     @if (t.status === 'received') {
-                      <button class="btn btn-sm" (click)="markPaid(t.id, $event)">Mark paid</button>
+                      <button class="btn btn-sm" (click)="markPaid(t.transactionId, $event)">Mark paid</button>
                     }
                   </td>
                 </tr>
