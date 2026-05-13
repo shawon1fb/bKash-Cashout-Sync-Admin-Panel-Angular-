@@ -13,7 +13,6 @@ import { Pagination } from '../../shared/components/pagination/pagination';
 import { AmountPipe } from '../../shared/pipes/amount.pipe';
 import { PhonePipe } from '../../shared/pipes/phone.pipe';
 import { fmtRelative, fmtDateShort } from '../../shared/utils/date.utils';
-import { TransactionQuery, TransactionResponse } from '../../core/models/transaction.model';
 import { ApiResponse } from '../../core/models/api-response.model';
 import { UserResponse } from '../../core/models/user.model';
 
@@ -197,21 +196,23 @@ export class TransactionListPage {
     stream: () => this.agentSvc.list({ limit: 100 }).pipe(map(r => r.data ?? [])),
   });
 
-  private readonly txQuery = computed((): TransactionQuery => ({
+  private readonly txQuery = computed(() => ({
     page: this.page(),
     limit: this.pageSize(),
     status: this.statusFilter() !== 'all' ? (this.statusFilter() as any) : undefined,
     agentId: this.isAdmin() && this.agentFilter() !== 'all' ? this.agentFilter() : undefined,
     ...this.dateRangeParams(),
+    _r: this.txSvc.reloadTrigger(),
   }));
 
   // Transactions — reactive to all filter signals
   readonly txRes = rxResource({
     params: this.txQuery,
     stream: ({ params }) => {
+      const { _r, ...query } = params as any;
       const obs = this.isAdmin()
-        ? this.txSvc.adminList(params)
-        : this.txSvc.list(params);
+        ? this.txSvc.adminList(query)
+        : this.txSvc.list(query);
       return obs.pipe(map(r => r));
     },
   });

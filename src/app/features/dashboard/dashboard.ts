@@ -249,6 +249,7 @@ export class DashboardPage {
 
   // ── Admin: fetch last 300 transactions for charts ─────────────────
   readonly adminTxRes = rxResource({
+    params: () => this.txSvc.reloadTrigger(),
     stream: () => this.txSvc.adminList({ limit: 300, page: 1 }).pipe(map(r => r.data ?? [])),
   });
 
@@ -272,6 +273,7 @@ export class DashboardPage {
   readonly recentTx    = computed(() => this.allTx().slice(0, 8));
 
   readonly topAgentsRes = rxResource({
+    params: () => this.txSvc.reloadTrigger(),
     stream: () => this.agentSvc.topAgents(5).pipe(map(r => r.data ?? [])),
   });
   readonly topAgents = computed(() => this.topAgentsRes.value() ?? [] as TopAgent[]);
@@ -283,6 +285,7 @@ export class DashboardPage {
 
   // ── Agent: fetch own transactions ─────────────────────────────────
   readonly agentTxRes = rxResource({
+    params: () => this.txSvc.reloadTrigger(),
     stream: () => this.txSvc.list({ limit: 300, page: 1 }).pipe(map(r => r.data ?? [])),
   });
 

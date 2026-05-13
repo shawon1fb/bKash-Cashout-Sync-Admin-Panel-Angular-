@@ -152,7 +152,11 @@ export class TransactionDrawer {
 
   onMarkPaid(): void {
     this.txService.updateStatus(this.tx().transactionId, 'paid').subscribe({
-      next: () => { this.toast.success('Marked as paid'); this.close.emit(); },
+      next: () => {
+        this.txService.reload();
+        this.toast.success('Marked as paid');
+        this.close.emit();
+      },
       error: () => this.toast.error('Failed to update status'),
     });
   }
