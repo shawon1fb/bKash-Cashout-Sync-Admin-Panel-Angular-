@@ -22,8 +22,10 @@ export class TransactionService {
     return this.api.get<TransactionResponse[]>('/admin/transactions', query as Record<string, any>);
   }
 
-  upload(rawMessage: string): Observable<ApiResponse<TransactionResponse>> {
-    return this.api.post<TransactionResponse>('/transactions/upload', { rawMessage });
+  upload(rawMessage: string, agentId?: string): Observable<ApiResponse<TransactionResponse>> {
+    const body: Record<string, string> = { rawMessage };
+    if (agentId) body['agentId'] = agentId;
+    return this.api.post<TransactionResponse>('/transactions/upload', body);
   }
 
   verify(transactionId: string): Observable<ApiResponse<TransactionResponse>> {

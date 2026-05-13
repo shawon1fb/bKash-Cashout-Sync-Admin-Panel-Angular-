@@ -73,7 +73,7 @@ import { TransactionService } from '../../../core/services/transaction.service';
               <div class="avatar">{{ agentInitials() }}</div>
               <div>
                 <div style="font-size:13px;font-weight:500">{{ tx().agentName || '—' }}</div>
-                <div class="mono" style="font-size:11px;color:var(--text-muted)">{{ tx().agentPhone | phone }}</div>
+                <div class="mono" style="font-size:11px;color:var(--text-muted)">{{ tx().agentPhone || tx().receiverPhone | phone }}</div>
               </div>
             </div>
           </div>

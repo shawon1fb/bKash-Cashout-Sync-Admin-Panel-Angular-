@@ -260,8 +260,8 @@ export class UploadPage {
     const agent = this.selectedAgent();
     if (this.isAdmin() && !agent) { this.parseError.set('Select an agent first'); return; }
     this.busy.set(true);
-    // Build raw message and submit to API
-    this.txSvc.upload(this.text()).subscribe({
+    const agentId = this.isAdmin() ? (agent as any).id : undefined;
+    this.txSvc.upload(this.text(), agentId).subscribe({
       next: (res) => {
         this.toast.success(`Added ${p.transactionId} · ৳ ${parseFloat(p.amount).toLocaleString()} to ledger`);
         this.busy.set(false);
