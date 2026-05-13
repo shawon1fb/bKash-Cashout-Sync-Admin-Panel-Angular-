@@ -1,8 +1,8 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { rxResource } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
+import { rxResource, toSignal, toObservable } from '@angular/core/rxjs-interop';
+import { map, debounceTime } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { DrawerService } from '../../core/services/drawer.service';
 import { ToastService } from '../../core/services/toast.service';
@@ -180,7 +180,11 @@ export class TransactionListPage {
   readonly sortDesc     = signal(true);
   readonly page         = signal(1);
   readonly pageSize     = signal(25);
-  private searchTimeout: any;
+
+  private readonly debouncedSearch = toSignal(
+    toObservable(this.search).pipe(debounceTime(400)),
+    { initialValue: '' }
+  );
 
   readonly skelRows = [1,2,3,4,5,6,7,8];
 
@@ -201,6 +205,7 @@ export class TransactionListPage {
     limit: this.pageSize(),
     status: this.statusFilter() !== 'all' ? (this.statusFilter() as any) : undefined,
     agentId: this.isAdmin() && this.agentFilter() !== 'all' ? this.agentFilter() : undefined,
+    search: this.debouncedSearch() || undefined,
     ...this.dateRangeParams(),
     _r: this.txSvc.reloadTrigger(),
   }));
@@ -240,8 +245,7 @@ export class TransactionListPage {
 
   onSearch(v: string): void {
     this.search.set(v);
-    clearTimeout(this.searchTimeout);
-    this.searchTimeout = setTimeout(() => this.page.set(1), 400);
+    this.page.set(1);
   }
 
   resetFilters(): void {

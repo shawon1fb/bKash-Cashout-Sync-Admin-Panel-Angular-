@@ -34,4 +34,5 @@ export interface TransactionQuery {
   from?: string;
   to?: string;
   agentId?: string;
+  search?: string;
 }
