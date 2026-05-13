@@ -1,192 +1,87 @@
-# bKash Cashout Sync — Admin Panel (Angular)
+# bKash Cashout Sync — Admin Panel
 
-> bKash Cashout Transaction Sync Platform এর জন্য একটি সম্পূর্ণ Angular 21 Admin Dashboard।
-> Admin এবং Agent — দুই ধরনের ইউজারের জন্য আলাদা UI ও রোল-বেসড অ্যাক্সেস সাপোর্ট করে।
+> bKash Cashout SMS থেকে Transaction parse করে sync করার platform-এর Angular 21 Admin Dashboard।
+> Admin এবং Agent — দুই role এর জন্য আলাদা UI ও access control।
 
 ---
 
 ## সূচিপত্র
 
-- [সংক্ষিপ্ত বিবরণ](#সংক্ষিপ্ত-বিবরণ)
-- [প্রধান ফিচার](#প্রধান-ফিচার)
+- [ফিচার](#ফিচার)
 - [টেক স্ট্যাক](#টেক-স্ট্যাক)
+- [শুরু করো](#শুরু-করো)
+- [পরিবেশ কনফিগারেশন](#পরিবেশ-কনফিগারেশন)
+- [NPM Scripts](#npm-scripts)
+- [রাউট ও Access Control](#রাউট-ও-access-control)
+- [Auth Flow](#auth-flow)
+- [Backend API](#backend-api)
 - [আর্কিটেকচার](#আর্কিটেকচার)
-- [ফোল্ডার স্ট্রাকচার](#ফোল্ডার-স্ট্রাকচার)
-- [প্রerequisites](#prerequisites)
-- [ইনস্টলেশন ও স্ক্রিপ্ট](#ইনস্টলেশন-ও-স্ক্রিপ্ট)
-- [ডেভেলপমেন্ট সার্ভার](#ডেভেলপমেন্ট-সার্ভার)
-- [বিল্ড](#বিল্ড)
-- [এনভায়রনমেন্ট কনফিগারেশন](#এনভায়রনমেন্ট-কনফিগারেশন)
-- [টেস্ট](#টেস্ট)
-- [অথেনটিকেশন ফ্লো](#অথেনটিকেশন-ফ্লো)
-- [রাউটিং ও অ্যাক্সেস কন্ট্রোল](#রাউটিং-ও-অ্যাক্সেস-কন্ট্রোল)
-- [ব্যাকএন্ড API](#ব্যাকএন্ড-api)
-- [স্টেট ম্যানেজমেন্ট ও কনভেনশন](#স্টেট-ম্যানেজমেন্ট-ও-কনভেনশন)
-- [কাস্টম পাইপ](#কাস্টম-পাইপ)
-- [ডার্ক মোড](#ডার্ক-মোড)
+- [Styling Guide](#styling-guide)
 - [ট্রাবলশুটিং](#ট্রাবলশুটিং)
-- [ডেপ্লয়মেন্ট](#ডেপ্লয়মেন্ট)
-- [লাইসেন্স](#লাইসেন্স)
+- [Deploy](#deploy)
 
 ---
 
-## সংক্ষিপ্ত বিবরণ
+## ফিচার
 
-এই প্রজেক্টটি bKash Cashout SMS থেকে ট্রানজাকশন পার্স করে সিঙ্ক করার একটি প্ল্যাটফর্মের অ্যাডমিন প্যানেল।
-
-ইউজাররা (Agent/Admin) OTP দিয়ে লগইন করে, Dashboard দেখতে পারে, Transaction ম্যানেজ করতে পারে এবং Reports দেখতে পারে। Admin গণ Agent ম্যানেজ করতে পারে এবং সব Agent এর Transaction দেখতে পারে।
-
----
-
-## প্রধান ফিচার
-
-- OTP ভিত্তিক লগইন (Phone → OTP → Verify)
-- Role-based Dashboard (Admin vs Agent)
-- Transaction লিস্ট, আপলোড এবং Status Change (Received → Paid)
-- Agent Management (Create, Edit, Deactivate)
-- Reports ও Charts (ApexCharts)
-- Dark/Light Mode Toggle
-- Responsive Layout (Desktop / Tablet / Mobile)
-- Bengali Phone Format (`017-1122-3344`) এবং Amount Format (`৳ 1,500.00`) Pipe
+- **Phone OTP Login** — Phone → 6-digit OTP → Verify
+- **Role-based Dashboard** — Admin ও Agent এর জন্য আলাদা stat, chart, table
+- **Transaction Management** — List, SMS upload, status change (Received → Paid)
+- **Transaction Detail Drawer** — Raw SMS, timeline, agent info সহ side panel
+- **Agent Management** — Create, Edit, Deactivate (Admin only)
+- **Reports & Charts** — Period selector, ApexCharts (line, bar, donut)
+- **Dark / Light Mode** — Default dark; toggle করলে `html.light` class লাগে
+- **Responsive** — Desktop sidebar, mobile hidden sidebar
+- **Custom Pipes** — `৳ 1,500.00` (AmountPipe), `017-1122-3344` (PhonePipe)
 
 ---
 
 ## টেক স্ট্যাক
 
-| প্রযুক্তি | সংস্করণ | উদ্দেশ্য |
-|-----------|--------|---------|
-| Angular | 21 | ফ্রন্টএন্ড ফ্রেমওয়ার্ক |
-| TypeScript | ~5.9 | টাইপ-সেফ কোড |
-| TailwindCSS | 4+ | Utility-first CSS |
-| ApexCharts | 5 | চার্ট ও গ্রাফ |
-| ng-apexcharts | 2 | Angular wrapper for ApexCharts |
+| প্রযুক্তি | Version | ব্যবহার |
+|-----------|---------|---------|
+| Angular | 21 | Framework (standalone, zoneless) |
+| TypeScript | ~5.9 | |
+| TailwindCSS | 4 | Layout utilities |
+| ApexCharts + ng-apexcharts | 5 / 2 | Charts |
 | date-fns | 4 | Date formatting |
-| RxJS | 7 | Reactive programming |
-| Vitest | 4 | Unit testing (Angular 21+ default) |
+| RxJS | 7 | Observables in services |
+| Vitest | 4 | Unit tests |
 
 ---
 
-## আর্কিটেকচার
+## শুরু করো
 
-- **Standalone Components** — কোনো NgModule ব্যবহার করা হয়নি
-- **Zoneless Change Detection** — `provideZonelessChangeDetection()`
-- **Angular Signals** — সব State Management `signal()`, `computed()`, `resource()` দিয়ে
-- **Functional Interceptors** — `authInterceptor` ও `refreshInterceptor`
-- **Lazy Loaded Routes** — প্রতিটি Feature route lazy-loaded
-
----
-
-## ফোল্ডার স্ট্রাকচার
-
-```
-src/
-├── app/
-│   ├── core/
-│   │   ├── interceptors/     # auth.interceptor.ts, refresh.interceptor.ts
-│   │   ├── guards/           # auth.guard.ts, role.guard.ts
-│   │   ├── services/         # auth, api, transaction, agent, toast, theme, storage, drawer
-│   │   └── models/           # user.model.ts, transaction.model.ts, api-response.model.ts
-│   ├── features/
-│   │   ├── auth/login/
-│   │   ├── dashboard/
-│   │   ├── transactions/     # list, my-transactions, upload
-│   │   ├── agents/           # list, detail
-│   │   ├── reports/          # admin-reports, my-reports
-│   │   └── settings/
-│   ├── shared/
-│   │   ├── components/       # sidebar, topbar, stat-card, status-badge, charts, dialogs, pagination
-│   │   ├── layout/           # admin-layout, auth-layout
-│   │   └── pipes/            # amount.pipe.ts, phone.pipe.ts, icon.pipe.ts
-│   ├── app.ts                # Root component
-│   ├── app.config.ts         # App configuration (router, http, zoneless)
-│   └── app.routes.ts         # Route definitions
-├── environments/
-│   ├── environment.ts        # dev: http://localhost:3000
-│   └── environment.prod.ts   # prod: https://api.yourdomain.com
-├── styles.scss               # Global styles, CSS variables, design tokens
-└── main.ts                   # Bootstrap
-```
-
----
-
-## Prerequisites
-
-- **Node.js** v22+ (LTS recommended)
-- **npm** 11+ (package.json-এ `packageManager: npm@11.11.0`)
-
-চেক করো:
+**Prerequisites:** Node.js v22+, npm 11+
 
 ```bash
-node -v   # v22.x বা উপরে
-npm -v    # 11.x বা উপরে
-```
+# version check
+node -v   # v22.x
+npm -v    # 11.x
 
----
-
-## ইনস্টলেশন ও স্ক্রিপ্ট
-
-```bash
-cd bkash-admin   # অথবা প্রজেক্ট ফোল্ডার
+# install
 npm install
-```
 
-### Available NPM Scripts
-
-| Command | কাজ |
-|---------|-----|
-| `npm start` | ডেভেলপমেন্ট সার্ভার চালু করে (`ng serve`) |
-| `npm run build` | ডিফল্ট production build তৈরি করে |
-| `npm run watch` | development mode এ watch build চালায় |
-| `npm test` | unit tests চালায় (Vitest) |
-
----
-
-## ডেভেলপমেন্ট সার্ভার
-
-```bash
+# dev server চালু করো
 npm start
-# অথবা
-npx ng serve
 ```
 
-ব্রাউজারে খুলো: `http://localhost:4200`
-
-Angular CLI এর হট-রিলোড সাপোর্ট আছে — কোড চেঞ্জ করলে অটো রিফ্রেশ হবে।
+Browser এ খুলো: **http://localhost:4200**
 
 ---
 
-## বিল্ড
+## পরিবেশ কনফিগারেশন
 
-### Development Build
-
-```bash
-npx ng build --configuration=development
-```
-
-### Production Build
-
-```bash
-npm run build
-# অথবা
-npx ng build --configuration=production
-```
-
-Production build এর output: `dist/bkash-admin/browser/`
-
----
-
-## এনভায়রনমেন্ট কনফিগারেশন
-
-### `src/environments/environment.ts` (Development)
+### Development — `src/environments/environment.ts`
 
 ```typescript
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:3000',   // তোমার local/dev API URL
+  apiUrl: 'http://localhost:8000',  // backend URL এখানে change করো
 };
 ```
 
-### `src/environments/environment.prod.ts` (Production)
+### Production — `src/environments/environment.prod.ts`
 
 ```typescript
 export const environment = {
@@ -195,152 +90,198 @@ export const environment = {
 };
 ```
 
-**API Base URL চেঞ্জ করতে** `src/environments/environment.ts` ফাইলটি এডিট করো।
-
-### CI/CD Convention
-
-পাইপলাইনে environment variable inject করতে চাইলে নিচের keys ব্যবহার করো:
-
-- `API_URL` → `environment.apiUrl`
-- `APP_ENV` → `production` flag নির্ধারণে
-
-Note: Angular runtime-এ `.env` সরাসরি পড়ে না; build-time replace বা pipeline template ব্যবহার করতে হবে।
+> Build-time এ Angular environment file swap করে — runtime `.env` কাজ করে না।
 
 ---
 
-## টেস্ট
+## NPM Scripts
 
-### সব Test চালানো
+| Command | কাজ |
+|---------|-----|
+| `npm start` | Dev server (`http://localhost:4200`) |
+| `npm run build` | Production build → `dist/bkash-admin/browser/` |
+| `npm run watch` | Dev mode watch build |
+| `npm test` | Vitest দিয়ে সব unit test |
 
-```bash
-npm test
-# অথবা
-npx ng test
+---
+
+## রাউট ও Access Control
+
+| Route | কে দেখতে পারবে | Component |
+|-------|--------------|-----------|
+| `/login` | সবাই (public) | LoginPage |
+| `/dashboard` | Admin + Agent | DashboardPage |
+| `/transactions` | Admin only | TransactionListPage |
+| `/my-transactions` | Agent only | TransactionListPage |
+| `/upload` | Admin + Agent | UploadPage |
+| `/agents` | Admin only | AgentListPage |
+| `/agents/:id` | Admin only | AgentDetailPage |
+| `/reports` | Admin only | ReportsPage |
+| `/my-reports` | Agent only | ReportsPage |
+| `/settings` | Admin + Agent | SettingsPage |
+
+**Guards:**
+- `authGuard` → login না থাকলে `/login`
+- `roleGuard` → wrong role হলে `/dashboard`
+
+---
+
+## Auth Flow
+
+```
+1. Phone input  →  POST /auth/otp/send
+2. 6-digit OTP  →  POST /auth/otp/verify
+3. Response এ accessToken + refreshToken + user → localStorage এ store
+       Keys: bk_access_token | bk_refresh_token | bk_user | bk_theme
+4. প্রতি API request এ:  Authorization: Bearer <accessToken>
+5. 401 পেলে:  refreshInterceptor → POST /auth/refresh → retry
+6. Refresh fail:  localStorage clear → /login redirect
+7. Logout:  POST /auth/logout → clear → /login
 ```
 
-### নির্দিষ্ট ফাইলের Test
-
-```bash
-npx ng test --include="**/auth.service.spec.ts"
-```
-
-Note: এই প্রজেক্টে Angular 21+ এর সাথে Vitest ব্যবহার করা হয়েছে (Karma/Jasmine নয়)।
-
 ---
 
-## অথেনটিকেশন ফ্লো
+## Backend API
 
-1. **Phone Input** → `POST /auth/otp/send` → OTP পাঠানো হয়
-2. **6-digit OTP** → `POST /auth/otp/verify` → Token পাওয়া যায়
-3. **Token Store** → localStorage-এ `accessToken`, `refreshToken` এবং `user` সংরক্ষণ
-4. **API Calls** → প্রতিটি রিকোয়েস্টে `Authorization: Bearer <token>` যায়
-5. **401 Handling** → `refreshInterceptor` refresh token দিয়ে retry করে
-6. **Logout** → `POST /auth/logout` → localStorage ক্লিয়ার → `/login`-এ রিডাইরেক্ট
+**Base URL:** `environment.apiUrl` (default: `http://localhost:8000`)
 
----
-
-## রাউটিং ও অ্যাক্সেস কন্ট্রোল
-
-| Route | Role | লেআউট |
-|-------|------|--------|
-| `/login` | Public | AuthLayout |
-| `/dashboard` | Auth (All) | AdminLayout |
-| `/transactions` | Admin | AdminLayout |
-| `/my-transactions` | Agent | AdminLayout |
-| `/upload` | Auth (All) | AdminLayout |
-| `/agents` | Admin | AdminLayout |
-| `/agents/:id` | Admin | AdminLayout |
-| `/reports` | Admin | AdminLayout |
-| `/my-reports` | Agent | AdminLayout |
-| `/settings` | Auth (All) | AdminLayout |
-
-- `authGuard` — লগইন না থাকলে `/login`-এ পাঠিয়ে দেয়
-- `roleGuard` — Admin route Agent কে `/dashboard`-এ পাঠিয়ে দেয়
-
----
-
-## ব্যাকএন্ড API
-
-### Auth (Public)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/auth/otp/send` | Phone number এ OTP পাঠায় |
-| POST | `/auth/otp/verify` | OTP verify করে token দেয় |
-| POST | `/auth/refresh` | Access token refresh করে |
-| POST | `/auth/logout` | Session invalidate করে |
-
-### Users (Authenticated)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/users/profile` | বর্তমান user এর প্রোফাইল |
-| PATCH | `/users/profile` | প্রোফাইল আপডেট |
-
-### Transactions (Authenticated)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/transactions` | Paginated transaction list |
-| POST | `/transactions/upload` | SMS থেকে transaction create |
-| GET | `/transactions/verify/:id` | Public transaction verify |
-| PATCH | `/transactions/:id/status` | Status update (paid/received) |
-| GET | `/transactions/summary` | Summary / Reports |
-
-### Admin (Admin only)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/admin/transactions` | সব transaction list |
-| GET | `/admin/transactions/summary` | সব transaction summary |
-| GET | `/admin/agents` | Agent list |
-| POST | `/admin/agents` | নতুন Agent create |
-| GET | `/admin/agents/:uuid` | নির্দিষ্ট Agent detail |
-| PATCH | `/admin/agents/:uuid` | Agent update |
-| DELETE | `/admin/agents/:uuid` | Agent deactivate/delete |
-| GET | `/admin/agents/:uuid/transactions` | Agent এর transaction list |
-| GET | `/admin/agents/:uuid/summary` | Agent এর summary |
-| GET | `/admin/agents/top` | Top agents |
-
-### Error Response Convention (Suggested)
-
-Backend error ideally নিচের shape এ consistent হলে frontend handling সহজ হয়:
-
+**Response envelope:**
 ```json
 {
-  "success": false,
-  "message": "Validation failed",
-  "errors": {
-    "phone": ["Phone number is invalid"]
-  }
+  "success": true,
+  "statusCode": 200,
+  "message": "...",
+  "data": {},
+  "meta": { "total": 0, "page": 1, "limit": 10, "totalPages": 1 }
 }
 ```
 
+**Error envelope:**
+```json
+{
+  "success": false,
+  "statusCode": 400,
+  "message": "...",
+  "errors": ["field: message"]
+}
+```
+
+### Auth (Public — token লাগে না)
+
+| Method | Endpoint | Body |
+|--------|----------|------|
+| POST | `/auth/otp/send` | `{ phone }` |
+| POST | `/auth/otp/verify` | `{ phone, otp }` |
+| POST | `/auth/refresh` | `{ refreshToken }` |
+| POST | `/auth/logout` | — |
+
+### Users
+
+| Method | Endpoint | Note |
+|--------|----------|------|
+| GET | `/users/profile` | নিজের profile |
+| PATCH | `/users/profile` | `{ name }` update |
+
+### Transactions
+
+| Method | Endpoint | Note |
+|--------|----------|------|
+| GET | `/transactions` | Agent এর নিজের list (paginated) |
+| POST | `/transactions/upload` | `{ rawMessage }` — SMS paste করে create |
+| GET | `/transactions/verify/:id` | Public verify (no token) |
+| PATCH | `/transactions/:id/status` | `{ status: "paid" \| "received" }` |
+| GET | `/transactions/summary` | `?period=daily\|weekly\|monthly\|custom` |
+
+### Admin
+
+| Method | Endpoint | Note |
+|--------|----------|------|
+| GET | `/admin/transactions` | সব transaction (paginated) |
+| GET | `/admin/transactions/summary` | Admin summary |
+| GET | `/admin/agents` | Agent list |
+| POST | `/admin/agents` | `{ name, phone }` create |
+| PATCH | `/admin/agents/:uuid` | `{ name?, isActive? }` |
+| DELETE | `/admin/agents/:uuid` | Deactivate |
+| GET | `/admin/agents/:uuid/transactions` | Agent এর transaction |
+| GET | `/admin/agents/:uuid/summary` | Agent এর summary |
+
 ---
 
-## স্টেট ম্যানেজমেন্ট ও কনভেনশন
+## আর্কিটেকচার
 
-1. **Always use `inject()`** — constructor injection এড়িয়ে চলো
-2. **Signals for state** — Component-এ `signal()`, `computed()`, `resource()` ব্যবহার করো
-3. **Templates** — `@if`, `@for`, `@switch` ব্যবহার করো (`*ngIf`, `*ngFor` এড়িয়ে চলো)
-4. **Defer heavy UI** — Chart / Table এর জন্য `@defer` ব্লক ব্যবহার করো
-5. **Never hardcode colors** — সবসময় CSS Variables ব্যবহার করো (`var(--brand)`, `var(--surface)`)
-6. **Forms** — ReactiveFormsModule ব্যবহার করো (template-driven নয়)
+```
+src/app/
+├── core/
+│   ├── guards/          auth.guard.ts · role.guard.ts
+│   ├── interceptors/    auth.interceptor.ts · refresh.interceptor.ts
+│   ├── models/          user · transaction · api-response
+│   └── services/
+│       ├── auth.service.ts       signals: currentUser, isAuthenticated, isAdmin
+│       ├── theme.service.ts      signal: theme ('dark'|'light')
+│       ├── drawer.service.ts     signal: tx — transaction detail drawer খোলে
+│       ├── storage.service.ts    localStorage wrapper
+│       ├── api.service.ts        base HTTP methods
+│       ├── transaction.service.ts
+│       ├── agent.service.ts
+│       └── toast.service.ts
+├── features/
+│   ├── auth/login/
+│   ├── dashboard/
+│   ├── transactions/    transaction-list.ts · upload/
+│   ├── agents/          agent-list.ts · agent-detail.ts
+│   ├── reports/         reports.ts
+│   └── settings/
+└── shared/
+    ├── components/      sidebar · topbar · stat-card · status-badge
+    │                    charts/ · confirm-dialog · pagination
+    │                    toast · transaction-drawer
+    ├── layout/          admin-layout · auth-layout
+    ├── pipes/           amount.pipe · phone.pipe · icon.pipe
+    └── utils/           date.utils · mock-data (dev only)
+```
+
+**Key patterns:**
+- `inject()` সব DI তে — constructor injection নয়
+- Component state: `signal()` / `computed()` / `resource()`
+- Template: `@if` / `@for` / `@switch` — `*ngIf` / `*ngFor` কখনো নয়
+- HTTP error: service এ handle, component এ নয়
+- Route param: `id = input.required<string>()` (no `ActivatedRoute`)
 
 ---
 
-## কাস্টম পাইপ
+## Styling Guide
 
-| Pipe | Input | Output |
-|------|-------|--------|
-| `AmountPipe` | `1500.00` | `৳ 1,500.00` |
-| `PhonePipe` | `01711223344` | `017-1122-3344` |
+সব global style `src/styles.scss` এ। Component এ আলাদা SCSS কম রাখো।
 
----
+**Dark mode:** Default dark (কোনো class নেই)। Light mode এ `html.light` class লাগে।
+`ThemeService.toggle()` দিয়ে switch হয়, localStorage এ `bk_theme` key তে save থাকে।
 
-## ডার্ক মোড
+**Brand color:** `--brand: #E2136E` (bKash pink)
 
-Dark/Light mode CSS variables (`styles.scss`) এবং `html` ট্যাগের `class="dark"` বা `class="light"` দিয়ে নিয়ন্ত্রিত হয়। User-এর Preference localStorage-এ সংরক্ষিত থাকে।
+**Key CSS variables:**
+
+```scss
+/* Surfaces */
+--bg · --surface · --surface-2 · --surface-3 · --hover
+
+/* Text */
+--text · --text-2 · --text-muted · --text-dim
+
+/* Borders */
+--border · --border-strong · --divider
+
+/* Semantic */
+--brand · --brand-2 · --brand-soft · --brand-ring
+--success · --warning · --danger · --info   (+ -soft variants)
+
+/* Misc */
+--shadow-sm · --shadow-md · --shadow-lg
+--r-xs · --r-sm · --r-md · --r-lg · --r-xl · --r-pill
+```
+
+**কখনো hardcode করো না** — সবসময় `var(--brand)`, `var(--surface)` ব্যবহার করো।
+
+**Ready-made utility classes:** `.card`, `.btn`, `.btn-primary`, `.btn-ghost`, `.btn-danger`, `.input`, `.label`, `.pill`, `.pill-success/warning/danger/info`, `.tbl`, `.skel`, `.stat`, `.avatar`, `.seg`, `.chip`, `.timeline-*`, `.page`, `.drawer`, `.dialog`, `.toast`
 
 ---
 
@@ -348,25 +289,39 @@ Dark/Light mode CSS variables (`styles.scss`) এবং `html` ট্যাগ�
 
 | সমস্যা | সমাধান |
 |--------|--------|
-| `npm install` error (engine mismatch) | Node.js `v22+` এবং npm `11+` আছে কিনা চেক করো |
-| `ng` command not found | `npm start` ব্যবহার করো, বা `npx ng serve` চালাও |
-| CORS / API call fail | `environment.ts` এর `apiUrl` backend URL এর সাথে মিলাও |
-| Auth loop (login page এ ফিরে যায়) | localStorage clear করে আবার login করো |
-| Charts render না হলে | browser console দেখে ApexCharts related error verify করো |
-| Build output খুঁজে পাওয়া যাচ্ছে না | `dist/bkash-admin/browser/` চেক করো |
+| `npm install` fail | Node v22+ ও npm 11+ আছে কিনা চেক করো |
+| `ng: command not found` | `npm start` বা `npx ng serve` ব্যবহার করো |
+| API call fail / CORS | `src/environments/environment.ts` এর `apiUrl` ঠিক করো |
+| Login loop (বারবার `/login` যাচ্ছে) | Browser localStorage clear করো (F12 → Application → Clear) |
+| Charts দেখা যাচ্ছে না | Console এ ApexCharts error দেখো; `@defer` block এর `@error` check করো |
+| Build error: budget exceeded | `angular.json` এর `budgets` limit বাড়াও বা lazy load ঠিক করো |
+| Dark mode কাজ করছে না | `html` tag এ `class="light"` আছে কিনা দেখো; `ThemeService` inject হয়েছে কিনা দেখো |
 
 ---
 
-## ডেপ্লয়মেন্ট
+## Deploy
 
-1. `npm run build` (production build)
-2. `dist/bkash-admin/browser/` থেকে static assets serve করো (Nginx / Cloudflare Pages / S3+CDN)
-3. SPA fallback configure করো — সব unknown route `index.html`-এ fallback করবে
-4. API base URL production environment অনুযায়ী set করো
-5. Deploy পর login, dashboard, upload, reports flow smoke test করো
+```bash
+# 1. Production build
+npm run build
+
+# 2. Output folder
+dist/bkash-admin/browser/
+
+# 3. Static file server এ serve করো (Nginx / Cloudflare Pages / S3+CDN)
+# 4. SPA fallback — সব unknown route → index.html
+# 5. API URL production environment.prod.ts এ set করো
+```
+
+**Nginx SPA config (example):**
+```nginx
+location / {
+  try_files $uri $uri/ /index.html;
+}
+```
+
+**Smoke test after deploy:** Login → Dashboard → Upload SMS → Transactions → Reports → Logout
 
 ---
 
-## লাইসেন্স
-
-Private — Internal use only.
+*Private — Internal use only.*
