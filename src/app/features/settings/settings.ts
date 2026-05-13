@@ -1,5 +1,6 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { IconPipe } from '../../shared/pipes/icon.pipe';
 import { AuthService } from '../../core/services/auth.service';
 import { AgentService } from '../../core/services/agent.service';
 import { ThemeService } from '../../core/services/theme.service';
@@ -10,7 +11,7 @@ import { PhonePipe } from '../../shared/pipes/phone.pipe';
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [FormsModule, PhonePipe],
+  imports: [FormsModule, PhonePipe, IconPipe],
   template: `
     <div class="page" style="max-width:880px">
       <div class="page-head">
@@ -25,7 +26,7 @@ import { PhonePipe } from '../../shared/pipes/phone.pipe';
         <div style="display:flex;flex-direction:column;gap:2px">
           @for (t of tabs; track t.key) {
             <div class="nav-item" [class.active]="tab() === t.key" (click)="tab.set(t.key)">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="ni-icon" [innerHTML]="iconPath(t.icon)"></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="ni-icon" [innerHTML]="t.icon | icon"></svg>
               <span>{{ t.label }}</span>
             </div>
           }
@@ -203,13 +204,4 @@ export class SettingsPage {
     });
   }
 
-  iconPath(icon: string): string {
-    const map: Record<string, string> = {
-      user:   '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
-      sun:    '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>',
-      shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
-      bell:   '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
-    };
-    return map[icon] ?? '';
-  }
 }
