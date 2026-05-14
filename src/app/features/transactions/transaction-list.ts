@@ -88,7 +88,7 @@ import { UserResponse } from '../../core/models/user.model';
                 <th>TrxID</th>
                 @if (isAdmin()) { <th>Agent</th> }
                 <th>Sender</th>
-                <th>Receiver</th>
+                <th>Receiver (Agent)</th>
                 <th class="tbl-num">Amount</th>
                 <th>Status</th>
                 <th>Time</th>
